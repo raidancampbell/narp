@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"time"
 )
 
 func main() {
@@ -62,12 +63,12 @@ func watchAndNarp(ctx context.Context, client *arp.Client, ip net.IP, addr net.H
 		}
 
 		if packet.SenderIP.Equal(net.IPv4zero) && !packet.TargetIP.Equal(net.IPv4zero) {
-			fmt.Printf("ARP Probe requesting if IP '%s' is available\n", packet.TargetIP.String())
-			fmt.Printf("Telling '%s' that we (%s) own it...\n", packet.SenderHardwareAddr, ip.String())
-			err := client.Reply(packet, addr, ip)
+			fmt.Printf("ARP Probe requesting if IP '%s' is available %s\n", packet.TargetIP.String(), time.Now().String())
+			fmt.Printf("Telling '%s' that we (%s) own it... %s\n", packet.SenderHardwareAddr, ip.String(), time.Now().String())
+			err := client.Reply(packet, addr, packet.TargetIP)
 			if err != nil {
 				fmt.Printf("ARP probe reply failed with '%s'.  Retrying...", err.Error())
-				err := client.Reply(packet, addr, ip)
+				err := client.Reply(packet, addr, packet.TargetIP)
 				if err != nil {
 					fmt.Println("retry failed, giving up")
 				}
